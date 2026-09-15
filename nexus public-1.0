@@ -1,0 +1,51 @@
+import os
+from openai import OpenAI
+
+# Kept exactly as you originally had it since it works perfectly for your local setup
+HF_TOKEN = "YOUR HUGGING FACE TOKEN HERE"
+
+client = OpenAI(
+    base_url="https://router.huggingface.co/v1",
+    api_key=HF_TOKEN
+)
+
+# Added the identity context here
+SYSTEM_PROMPT = {
+    "role": "system",
+    "content": "You are a helpful ai chatot"
+}
+
+print("Nexus Chatbot Initialized! Type 'quit' or 'exit' to stop.")
+print("-" * 50)
+
+while True:
+    user_input = input("\nYou: ")
+    
+    if user_input.lower() in ['quit', 'exit']:
+        print("Goodbye!")
+        break
+        
+    if not user_input.strip():
+        continue
+        
+    try:
+        completion = client.chat.completions.create(
+            model="openai/gpt-oss-20b:together",
+            messages=[
+                SYSTEM_PROMPT,  # Injects the identity
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ],
+        )
+        
+        # SAFE CHECK: See if the response is just a raw string message
+        if isinstance(completion, str):
+            print(f"AI (Raw String Response): {completion}")
+        else:
+            # Fixed to match your exact working structure
+            print(f"nexus: {completion.choices[0].message.content}")
+            
+    except Exception as e:
+        print(f"An error occurred: {e}")
